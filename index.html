@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            flex-direction: column;
+        }
+
+        .container {
+            margin-top: 10em;
+            margin-left: 34em;
+            justify-content: center;
+            align-items: center;
+            
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 20px;
+            width: 90%;
+            max-width: 400px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: center;
+        }
+
+        .container h1 {
+            font-size: 24px;
+            color: #333;
+        }
+
+        .container input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            font-size: 16px;
+            margin-top: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #qrcode {
+            margin-top: 20px;
+        }
+
+        .save-btn {
+            margin-top: 15px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .save-btn:hover {
+            background-color: #45a049;
+        }
+
+        /* Navbar Styling */
+        .navbar {
+            background-color: transparent;
+            color: white;
+            width: 25em;
+            padding: 10px;
+            margin-bottom: 2em;
+            position: relative;
+            text-align: left;
+            z-index: 10;
+        }
+
+        .menu-icon {
+            font-size: 24px;
+            cursor: pointer;
+            color: green;
+        }
+
+        /* Dropdown Menu */
+        .dropdown {
+            display: none;
+            background-color: lightseagreen;
+            position: absolute;
+            width: 100%;
+            top: 40px;
+            left: 0;
+            z-index: 1;
+        }
+
+        .dropdown a {
+            display: block;
+            padding: 10px;
+            color: white;
+            text-decoration: none;
+            font-size: 20px;
+        }
+
+        .dropdown a:hover {
+            background-color: #45a049;
+        }
+
+        /* Custom Color Page Animation */
+        .custom-color-page, .feedback-page {
+            margin-top: 2em;
+            display: none;
+            position: absolute;
+            top: 0;
+            left: 100%;
+            width: 100%;
+            height: 100vh;
+            background-color: white;
+            padding: 20px;
+            box-sizing: border-box;
+            transition: all 0.4s ease-in-out;
+        }
+
+        .custom-color-page.open, .feedback-page.open {
+            display: block;
+            left: 0;
+        }
+
+        .back-btn {
+            cursor: pointer;
+            color: #4CAF50;
+            margin-bottom: 10px;
+        }
+
+        /* Feedback Form Styling */
+        .feedback-form input,
+        .feedback-form textarea {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .feedback-form button {
+            padding: 10px 20px;
+            font-size: 16px;
+            background-color: #4CAF50;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        .feedback-form button:hover {
+            background-color: #45a049;
+        }
+
+        /* Responsive Styling */
+        @media (max-width: 768px) {
+            body {
+            font-family: Arial, sans-serif;
+            background-color: #f7f7f7;
+            height: 100vh;
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            flex-direction: column;
+        }
+            .container {
+                padding: 15px;
+                max-width: 100%;
+                margin-left: 1.5em;
+                margin-right: 3em;
+            }
+
+            .container h1 {
+                font-size: 20px;
+            }
+
+            .menu-icon {
+                font-size: 28px;
+            }
+
+            .navbar {
+                padding: 12px;
+            }
+
+            .dropdown a {
+                font-size: 14px;
+            }
+
+            .save-btn {
+                font-size: 14px;
+                padding: 8px 16px;
+            }
+
+            .custom-color-page, .feedback-page {
+                width: 100%;
+                padding: 15px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 10px;
+                max-width: 100%;
+                margin-left: 0.7em;
+                margin-top: 12em;
+            }
+
+            .container h1 {
+                font-size: 18px;
+            }
+
+            .menu-icon {
+                font-size: 30px;
+            }
+
+            .navbar {
+                padding: 10px;
+            }
+
+            .dropdown a {
+                font-size: 12px;
+            }
+
+            .save-btn {
+                font-size: 12px;
+                padding: 6px 12px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar with dropdown and menu icon -->
+    <div class="navbar">
+        <span class="menu-icon" onclick="toggleDropdown()">☰</span>
+        <div class="dropdown" id="dropdownMenu">
+            <a href="#" onclick="changeColor('#000000', '#ffffff')">Default Color</a>
+            <a href="#" onclick="changeColor('#FF5733', '#ffffff')">Orange</a>
+            <a href="#" onclick="changeColor('#3333FF', '#ffffff')">Blue</a>
+            <a href="#" onclick="changeColor('#00CC66', '#ffffff')">Green</a>
+            <a href="#" onclick="openCustomColorPage()">Create Custom Color</a>
+            <a href="#" onclick="openFeedbackPage()">Feedback</a>
+        </div>
+    </div>
+
+    <!-- QR Code Generator Container -->
+    <div class="container">
+        <h1>QR Code Generator</h1>
+        <input type="text" id="urlInput" placeholder="Enter URL here" oninput="generateQRCode()">
+        <div id="qrcode"></div>
+        <button class="save-btn" onclick="saveQRCode()">Save as Image</button>
+    </div>
+
+    <!-- Custom Color Creation Page -->
+    <div class="custom-color-page" id="customColorPage">
+        <span class="back-btn" onclick="closeCustomColorPage()">← Back</span>
+        <h2>Create Custom Color</h2>
+        <label>QR Code Color:</label>
+        <input type="color" id="customColorDark"><br><br>
+        <label>Background Color:</label>
+        <input type="color" id="customColorLight"><br><br>
+        <label>Color Name:</label>
+        <input type="text" id="customColorName" placeholder="Name your color">
+        <button class="save-btn" onclick="applyCustomColor()">Apply Custom Color</button>
+    </div>
+
+    <!-- Feedback Page -->
+    <div class="feedback-page" id="feedbackPage">
+        <span class="back-btn" onclick="closeFeedbackPage()">← Back</span>
+        <h2>Feedback</h2>
+        <form action="https://api.web3forms.com/submit" method="POST">
+
+            <!-- Replace with your Access Key -->
+            <input type="hidden" name="access_key" value="1c38bca9-7967-4e0a-aff6-e99808a76363">
+        
+            <label for="name">Your Name:</label>
+            <input type="text" id="name" name="name" placeholder="Enter your name" required><br><br>
+            <label for="email">Your Email:</label>
+            <input type="email" id="email" name="email" placeholder="Enter your email" required><br><br>
+            <label for="feedback">Your Feedback:</label>
+            <textarea id="feedback" name="feedback" rows="4" placeholder="Write your feedback here" required></textarea><br><br>
+            <button type="submit">Submit Feedback</button>
+        </form>
+    </div>
+
+    <!-- QRCode.js library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script>
+        let colorDark = "#000000";
+        let colorLight = "#ffffff";
+
+        function toggleDropdown() {
+            const dropdown = document.getElementById("dropdownMenu");
+            dropdown.style.display = dropdown.style.display === "block" ? "none" : "block";
+        }
+
+        function openCustomColorPage() {
+            document.getElementById("customColorPage").classList.add("open");
+            document.getElementById("dropdownMenu").style.display = "none";
+        }
+
+        function closeCustomColorPage() {
+            document.getElementById("customColorPage").classList.remove("open");
+        }
+
+        function openFeedbackPage() {
+            document.getElementById("feedbackPage").classList.add("open");
+            document.getElementById("dropdownMenu").style.display = "none";
+        }
+
+        function closeFeedbackPage() {
+            document.getElementById("feedbackPage").classList.remove("open");
+        }
+
+        function changeColor(darkColor, lightColor) {
+            colorDark = darkColor;
+            colorLight = lightColor;
+            generateQRCode(); // Regenerate QR Code with new colors
+            document.getElementById("dropdownMenu").style.display = "none";
+        }
+
+        function generateQRCode() {
+            const url = document.getElementById("urlInput").value;
+            const qrcodeContainer = document.getElementById("qrcode");
+
+            // Clear previous QR code if any
+            qrcodeContainer.innerHTML = "";
+
+            if (url) {
+                new QRCode(qrcodeContainer, {
+                    text: url,
+                    width: 256,
+                    height: 256,
+                    colorDark: colorDark,
+                    colorLight: colorLight,
+                });
+            }
+        }
+
+        function saveQRCode() {
+            const qrcodeCanvas = document.querySelector('#qrcode canvas');
+            if (qrcodeCanvas) {
+                // Create a border around the downloaded image
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                const borderThickness = 3;  // Thin border
+
+                // Set the canvas size to include the border
+                canvas.width = qrcodeCanvas.width + (borderThickness * 2);
+                canvas.height = qrcodeCanvas.height + (borderThickness * 2);
+
+                // Draw the border (thin white line)
+                context.fillStyle = '#ffffff';  // Border color (white)
+                context.fillRect(0, 0, canvas.width, canvas.height);  // Draw border
+
+                // Draw the QR code on top of the border
+                context.drawImage(qrcodeCanvas, borderThickness, borderThickness);
+
+                // Convert the canvas to a data URL
+                const dataUrl = canvas.toDataURL("image/png", 1.0);
+
+                // Create a download link
+                const link = document.createElement('a');
+                link.href = dataUrl;
+                link.download = 'qrcode-with-white-border.png';
+                link.click();
+            } else {
+                alert("Please generate a QR code first.");
+            }
+        }
+
+        function applyCustomColor() {
+            const customDarkColor = document.getElementById("customColorDark").value;
+            const customLightColor = document.getElementById("customColorLight").value;
+            const customColorName = document.getElementById("customColorName").value;
+
+            if (customDarkColor && customLightColor) {
+                colorDark = customDarkColor;
+                colorLight = customLightColor;
+                alert(`Custom color ${customColorName} applied!`);
+                generateQRCode(); // Regenerate QR Code with custom colors
+                closeCustomColorPage();
+            } else {
+                alert("Please select both colors.");
+            }
+        }
+
+
+
+        // Feedback form submission handler
+        document.querySelector('.feedback-form').addEventListener('submit', function(event) {
+            event.preventDefault(); // Prevent page reload on form submission
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const feedback = document.getElementById('feedback').value;
+
+            if (name && email && feedback) {
+                alert("Thank you for your feedback!");
+                document.getElementById('name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('feedback').value = '';
+                closeFeedbackPage(); // Close the feedback page after submission
+            } else {
+                alert("Please fill in all fields.");
+            }
+        });
+    </script>
+</body>
+</html>
